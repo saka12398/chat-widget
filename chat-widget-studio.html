@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chat Widget Studio</title>
+
+<style>
+:root{
+  --page:#11131a;
+  --panel:#191c25;
+  --panel2:#222634;
+  --line:#34394a;
+  --text:#f7f7fb;
+  --muted:#9da3b5;
+
+  --accent1:#8b5cf6;
+  --accent2:#ec4899;
+  --bubble:#ffffff;
+  --bubbleText:#242631;
+  --name:#6d5ce7;
+
+  --radius:18px;
+  --border:2px;
+  --shadow:0 10px 28px rgba(0,0,0,.22);
+
+  --bubblePadX:16px;
+  --bubblePadY:12px;
+  --gap:10px;
+  --fontSize:14px;
+  --nameSize:11px;
+  --outline:#ffffff;
+  --outlineWidth:0px;
+  --opacity:1;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:340px 1fr;
+}
+
+.editor{
+  background:linear-gradient(180deg,#171a22,#11131a);
+  border-right:1px solid var(--line);
+  overflow:auto;
+  padding:18px;
+}
+
+.brand{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+.brand h1{font-size:19px;margin:0}
+.brand span{color:#a78bfa}
+.badge{
+  font-size:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#272b39;
+  color:#b9bff0;
+}
+
+.section{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.025);
+  border-radius:14px;
+  padding:13px;
+  margin-bottom:12px;
+}
+.section h2{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:#aeb4c5;
+  margin:0 0 11px;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.field{margin-bottom:9px}
+.field:last-child{margin-bottom:0}
+label{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  color:#c8ccda;
+  font-size:11px;
+  margin-bottom:5px;
+}
+.value{color:#8f96aa}
+
+input[type="text"],input[type="number"],select,textarea{
+  width:100%;
+  color:#f6f7fb;
+  background:#11141c;
+  border:1px solid #353a4a;
+  border-radius:9px;
+  padding:8px 9px;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:#8b5cf6}
+
+input[type="color"]{
+  width:100%;
+  height:34px;
+  padding:2px;
+  border:1px solid #353a4a;
+  border-radius:9px;
+  background:#11141c;
+}
+input[type="range"]{
+  width:100%;
+  accent-color:#8b5cf6;
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:11px;
+  color:#c8ccda;
+  margin-top:7px;
+}
+.check input{accent-color:#8b5cf6}
+
+button{
+  border:1px solid transparent;
+  color:#fff;
+  border-radius:9px;
+  padding:9px 11px;
+  background:#7c3aed;
+  font-weight:700;
+  font-size:11px;
+}
+button:hover{filter:brightness(1.12)}
+button.secondary{background:#272b38;border-color:#3b4051}
+button.danger{background:#5b2431}
+.buttons{display:flex;gap:7px}
+.buttons button{flex:1}
+
+.workspace{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.toolbar{
+  height:62px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  background:#151820;
+}
+.toolbar-title{font-weight:800;font-size:14px}
+.toolbar-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+.preview-wrap{
+  position:relative;
+  flex:1;
+  min-height:700px;
+  overflow:auto;
+  background-color:#30334a;
+  background-image:
+    linear-gradient(45deg,rgba(255,255,255,.035) 25%,transparent 25%),
+    linear-gradient(-45deg,rgba(255,255,255,.035) 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,rgba(255,255,255,.035) 75%),
+    linear-gradient(-45deg,transparent 75%,rgba(255,255,255,.035) 75%);
+  background-size:32px 32px;
+  background-position:0 0,0 16px,16px -16px,-16px 0;
+  padding:32px;
+}
+
+.stage{
+  min-height:100%;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+}
+
+.chat{
+  width:min(470px,100%);
+  display:flex;
+  flex-direction:column;
+  gap:var(--gap);
+}
+
+.msg{
+  position:relative;
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  animation:enter .28s ease both;
+}
+@keyframes enter{
+  from{opacity:0;transform:translateY(8px) scale(.98)}
+  to{opacity:1;transform:none}
+}
+
+.avatar{
+  width:34px;height:34px;flex:0 0 34px;
+  display:grid;place-items:center;
+  overflow:hidden;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  color:#fff;font-size:11px;font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+.msg-body{min-width:0;max-width:calc(100% - 43px)}
+
+.name{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 9px;
+  margin:0 0 -1px 9px;
+  position:relative;
+  z-index:2;
+  color:#fff;
+  font-size:var(--nameSize);
+  font-weight:900;
+  line-height:1;
+  border-radius:8px 8px 3px 3px;
+  background:linear-gradient(100deg,var(--accent1),var(--accent2));
+  box-shadow:0 3px 10px rgba(0,0,0,.12);
+}
+
+.platform{
+  font-size:8px;
+  padding:2px 4px;
+  border-radius:4px;
+  background:rgba(0,0,0,.18);
+}
+
+.bubble{
+  color:var(--bubbleText);
+  background:var(--bubble);
+  border:var(--border) solid color-mix(in srgb,var(--accent1),transparent 15%);
+  border-radius:var(--radius);
+  padding:var(--bubblePadY) var(--bubblePadX);
+  box-shadow:var(--shadow);
+  font-size:var(--fontSize);
+  line-height:1.4;
+  opacity:var(--opacity);
+  outline:var(--outlineWidth) solid var(--outline);
+  overflow-wrap:anywhere;
+  position:relative;
+}
+
+.bubble.shape-pill{border-radius:999px}
+.bubble.shape-square{border-radius:4px}
+.bubble.shape-soft{border-radius:calc(var(--radius) * 1.7)}
+.bubble.shape-ticket{
+  border-radius:3px 18px 3px 18px;
+}
+.bubble.shape-notch{
+  border-radius:3px 18px 18px 18px;
+}
+.bubble.shape-chat{
+  border-radius:18px 18px 18px 3px;
+}
+.bubble.shape-hex{
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);
+  border-radius:0;
+}
+
+.demo-note{
+  position:absolute;
+  left:20px;top:20px;
+  color:rgba(255,255,255,.5);
+  font-size:11px;
+  pointer-events:none;
+}
+
+#cssEditor{
+  min-height:210px;
+  resize:vertical;
+  font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.help{
+  color:#8f96aa;
+  font-size:10px;
+  line-height:1.45;
+  margin-top:7px;
+}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .editor{border-right:0;border-bottom:1px solid var(--line);max-height:none}
+  .preview-wrap{min-height:650px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="editor">
+  <div class="brand">
+    <h1>Chat<span>Widget</span> Studio</h1>
+    <div class="badge">CSS EDITOR</div>
+  </div>
+
+  <div class="section">
+    <h2>Message</h2>
+    <div class="row">
+      <div class="field">
+        <label>Username</label>
+        <input id="username" value="MILA">
+      </div>
+      <div class="field">
+        <label>Platform</label>
+        <select id="platform">
+          <option>YouTube</option>
+          <option>TikTok</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Message</label>
+      <input id="message" value="This is a test message ✨">
+    </div>
+    <div class="buttons">
+      <button id="send">Add message</button>
+      <button class="secondary" id="demo">Demo</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Shape</h2>
+    <div class="field">
+      <label>Bubble type</label>
+      <select id="shape">
+        <option value="">Rounded</option>
+        <option value="shape-soft">Soft rounded</option>
+        <option value="shape-pill">Pill</option>
+        <option value="shape-square">Square</option>
+        <option value="shape-notch">Notch</option>
+        <option value="shape-chat">Chat bubble</option>
+        <option value="shape-ticket">Ticket / angled</option>
+        <option value="shape-hex">Hex / angular</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Radius <span class="value" id="radiusV">18px</span></label>
+        <input id="radius" type="range" min="0" max="50" value="18">
+      </div>
+      <div class="field">
+        <label>Border <span class="value" id="borderV">2px</span></label>
+        <input id="border" type="range" min="0" max="8" value="2">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Colors</h2>
+    <div class="row">
+      <div class="field">
+        <label>Accent 1</label>
+        <input id="accent1" type="color" value="#8b5cf6">
+      </div>
+      <div class="field">
+        <label>Accent 2</label>
+        <input id="accent2" type="color" value="#ec4899">
+      </div>
+    </div>
+    <div class="field">
+      <label>Bubble color</label>
+      <input id="bubble" type="color" value="#ffffff">
+    </div>
+    <div class="field">
+      <label>Text color</label>
+      <input id="bubbleText" type="color" value="#242631">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Gradient angle <span class="value" id="angleV">100°</span></label>
+        <input id="angle" type="range" min="0" max="360" value="100">
+      </div>
+      <div class="field">
+        <label>Opacity <span class="value" id="opacityV">100%</span></label>
+        <input id="opacity" type="range" min="20" max="100" value="100">
+      </div>
+    </div>
+    <label class="check">
+      <input id="gradient" type="checkbox" checked>
+      Use accent gradient
+    </label>
+  </div>
+
+  <div class="section">
+    <h2>Spacing / Typography</h2>
+    <div class="row">
+      <div class="field">
+        <label>Font <span class="value" id="fontV">14px</span></label>
+        <input id="font" type="range" min="9" max="24" value="14">
+      </div>
+      <div class="field">
+        <label>Name <span class="value" id="nameV">11px</span></label>
+        <input id="nameSize" type="range" min="8" max="18" value="11">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Horizontal pad <span class="value" id="padXV">16px</span></label>
+        <input id="padX" type="range" min="4" max="40" value="16">
+      </div>
+      <div class="field">
+        <label>Vertical pad <span class="value" id="padYV">12px</span></label>
+        <input id="padY" type="range" min="4" max="30" value="12">
+      </div>
+    </div>
+    <div class="field">
+      <label>Message gap <span class="value" id="gapV">10px</span></label>
+      <input id="gap" type="range" min="0" max="30" value="10">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Advanced CSS</h2>
+    <textarea id="cssEditor">/* CSS bebas.
+   Selector utama:
+
+   .msg
+   .avatar
+   .name
+   .bubble
+   .platform
+
+   Contoh:
+*/
+.bubble{
+  background: linear-gradient(100deg, #fff, #f1ecff);
+  box-shadow: 0 8px 25px rgba(0,0,0,.22);
+}
+
+.name{
+  letter-spacing: .06em;
+}
+
+.bubble::after{
+  content:"";
+  position:absolute;
+  right:10px;
+  top:0;
+  width:3px;
+  height:100%;
+  background:linear-gradient(var(--accent1),var(--accent2));
+}</textarea>
+    <div class="buttons" style="margin-top:8px">
+      <button id="applyCss">Apply CSS</button>
+      <button class="secondary" id="resetCss">Reset CSS</button>
+    </div>
+    <div class="help">
+      CSS ini langsung disuntikkan ke preview. Jadi kamu bisa bikin
+      border aneh, gradient, glow, pseudo-element, clip-path,
+      font, shadow, dan bentuk chat sendiri.
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Control</h2>
+    <div class="buttons">
+      <button class="secondary" id="clear">Clear</button>
+      <button class="secondary" id="save">Save theme</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="danger" id="transparent" style="width:100%">Toggle transparent preview</button>
+    </div>
+  </div>
+</aside>
+
+<main class="workspace">
+  <header class="toolbar">
+    <div>
+      <div class="toolbar-title">Live Chat Preview</div>
+      <div class="toolbar-sub">TikTok / YouTube style • OBS-ready layout</div>
+    </div>
+    <div class="buttons">
+      <button class="secondary" id="export">Export CSS</button>
+    </div>
+  </header>
+
+  <div class="preview-wrap" id="preview">
+    <div class="demo-note">TRANSPARENT / OBS PREVIEW AREA</div>
+    <div class="stage">
+      <div class="chat" id="chat"></div>
+    </div>
+  </div>
+</main>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+
+const defaultCSS = $('cssEditor').value;
+
+function setVar(name,value){
+  root.style.setProperty(name,value);
+}
+
+function update(){
+  const a1 = $('accent1').value;
+  const a2 = $('accent2').value;
+  const useGradient = $('gradient').checked;
+
+  setVar('--accent1',a1);
+  setVar('--accent2',a2);
+  setVar('--bubble',$('bubble').value);
+  setVar('--bubbleText',$('bubbleText').value);
+
+  setVar('--radius',$('radius').value+'px');
+  setVar('--border',$('border').value+'px');
+  setVar('--fontSize',$('font').value+'px');
+  setVar('--nameSize',$('nameSize').value+'px');
+  setVar('--bubblePadX',$('padX').value+'px');
+  setVar('--bubblePadY',$('padY').value+'px');
+  setVar('--gap',$('gap').value+'px');
+  setVar('--opacity',$('opacity').value/100);
+
+  $('radiusV').textContent=$('radius').value+'px';
+  $('borderV').textContent=$('border').value+'px';
+  $('fontV').textContent=$('font').value+'px';
+  $('nameV').textContent=$('nameSize').value+'px';
+  $('padXV').textContent=$('padX').value+'px';
+  $('padYV').textContent=$('padY').value+'px';
+  $('gapV').textContent=$('gap').value+'px';
+  $('angleV').textContent=$('angle').value+'°';
+  $('opacityV').textContent=$('opacity').value+'%';
+
+  document.querySelectorAll('.name').forEach(n=>{
+    n.style.background = useGradient
+      ? `linear-gradient(${$('angle').value}deg,${a1},${a2})`
+      : a1;
+  });
+}
+
+function createMessage(user,text,platform){
+  const msg=document.createElement('div');
+  msg.className='msg';
+
+  const avatar=document.createElement('div');
+  avatar.className='avatar';
+  avatar.textContent=(user.trim()[0]||'?').toUpperCase();
+
+  const body=document.createElement('div');
+  body.className='msg-body';
+
+  const name=document.createElement('div');
+  name.className='name';
+  name.innerHTML = `${escapeHtml(user)} <span class="platform">${escapeHtml(platform)}</span>`;
+
+  const bubble=document.createElement('div');
+  bubble.className='bubble '+$('shape').value;
+  bubble.textContent=text;
+
+  body.append(name,bubble);
+  msg.append(avatar,body);
+
+  $('chat').appendChild(msg);
+
+  while($('chat').children.length>14){
+    $('chat').firstElementChild.remove();
+  }
+
+  update();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
+}
+
+$('send').onclick=()=>{
+  createMessage(
+    $('username').value||'Viewer',
+    $('message').value||'Hello!',
+    $('platform').value
+  );
+};
+
+$('demo').onclick=()=>{
+  $('chat').innerHTML='';
+  const data=[
+    ['MILA','This is a streamer message ✨','YouTube'],
+    ['viewer_01','This is a viewer message','TikTok'],
+    ['NOVA','VIP user test message 💜','YouTube'],
+    ['MOD_RAY','This is a moderator test message','TikTok'],
+    ['HEHEHAHA','Hope you like it! <3','YouTube'],
+    ['Akasa','Wih, custom CSS 🔥','TikTok']
+  ];
+
+  data.forEach((m,i)=>{
+    setTimeout(()=>createMessage(...m),i*180);
+  });
+};
+
+$('clear').onclick=()=>{$('chat').innerHTML=''};
+
+$('shape').oninput=()=>{
+  document.querySelectorAll('.bubble').forEach(b=>{
+    b.className='bubble '+$('shape').value;
+  });
+};
+
+[
+  'radius','border','accent1','accent2','bubble','bubbleText',
+  'font','nameSize','padX','padY','gap','angle','opacity','gradient'
+].forEach(id=>{
+  $(id).addEventListener('input',update);
+  $(id).addEventListener('change',update);
+});
+
+$('applyCss').onclick=()=>{
+  let style=document.getElementById('custom-style');
+  if(!style){
+    style=document.createElement('style');
+    style.id='custom-style';
+    document.head.appendChild(style);
+  }
+  style.textContent=$('cssEditor').value;
+};
+
+$('resetCss').onclick=()=>{
+  $('cssEditor').value=defaultCSS;
+  $('applyCss').click();
+};
+
+let transparent=false;
+$('transparent').onclick=()=>{
+  transparent=!transparent;
+  $('preview').style.background=transparent
+    ? 'transparent'
+    : '';
+};
+
+$('save').onclick=()=>{
+  const theme={
+    accent1:$('accent1').value,
+    accent2:$('accent2').value,
+    bubble:$('bubble').value,
+    bubbleText:$('bubbleText').value,
+    radius:$('radius').value,
+    border:$('border').value,
+    font:$('font').value,
+    nameSize:$('nameSize').value,
+    padX:$('padX').value,
+    padY:$('padY').value,
+    gap:$('gap').value,
+    angle:$('angle').value,
+    opacity:$('opacity').value,
+    gradient:$('gradient').checked,
+    shape:$('shape').value,
+    css:$('cssEditor').value
+  };
+
+  localStorage.setItem('chatWidgetTheme',JSON.stringify(theme));
+  alert('Theme tersimpan di browser.');
+};
+
+$('export').onclick=()=>{
+  const css = `:root{
+  --accent1:${$('accent1').value};
+  --accent2:${$('accent2').value};
+  --bubble:${$('bubble').value};
+  --bubbleText:${$('bubbleText').value};
+  --radius:${$('radius').value}px;
+  --border:${$('border').value}px;
+  --fontSize:${$('font').value}px;
+  --nameSize:${$('nameSize').value}px;
+  --bubblePadX:${$('padX').value}px;
+  --bubblePadY:${$('padY').value}px;
+  --gap:${$('gap').value}px;
+  --opacity:${$('opacity').value/100};
+}
+
+.bubble{
+  border-radius:var(--radius);
+  border-width:var(--border);
+  background:var(--bubble);
+  color:var(--bubbleText);
+  font-size:var(--fontSize);
+}
+
+.chat{gap:var(--gap)}
+
+.name{
+  font-size:var(--nameSize);
+  background:linear-gradient(${$('angle').value}deg,var(--accent1),var(--accent2));
+}
+
+${$('cssEditor').value}`;
+
+  navigator.clipboard?.writeText(css);
+  alert('CSS sudah dicopy ke clipboard.');
+};
+
+function loadSaved(){
+  try{
+    const t=JSON.parse(localStorage.getItem('chatWidgetTheme'));
+    if(!t)return;
+
+    for(const [key,value] of Object.entries(t)){
+      const el=$(key);
+      if(!el)continue;
+      if(el.type==='checkbox')el.checked=value;
+      else el.value=value;
+    }
+    $('applyCss').click();
+  }catch(e){}
+}
+
+loadSaved();
+update();
+
+createMessage('MILA','This is a streamer message ✨','YouTube');
+createMessage('viewer_01','This is a viewer message','TikTok');
+createMessage('MODUSER','This is a moderator test message','YouTube');
+</script>
+</body>
+</html>
