@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Chat Widget Studio v3</title>
+<title>Chat Widget Studio — AI + RVchat (Copy)</title>
 <style>
 :root{--a1:#8b5cf6;--a2:#ec4899;--bubble:#fff;--bt:#272938;--r:16px;--bw:2px;--fs:14px;--ns:11px;--px:15px;--py:10px;--gap:10px;--op:1;--shadow:0 7px 20px rgba(0,0,0,.18)}
 *{box-sizing:border-box}
@@ -289,6 +289,18 @@ body.mode-display-active .f-hint:hover{opacity:1}
   color:#fff;
   border-color:#7c3aed;
 }
+
+/* ===== AI STYLE ASSISTANT (Photo + RVchat) ===== */
+.ai-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
+.ai-tab{padding:8px 4px;background:#1c1f2b;color:#858ca0;border:1px solid #303447;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.03em}
+.ai-tab.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.ai-panel{display:none}
+.ai-panel.active{display:block}
+.rv-box{width:100%;min-height:84px;background:#0c0e14;color:#eef0f9;border:1px solid #35394a;border-radius:9px;padding:10px;font-size:12px;line-height:1.55;resize:vertical;outline:none}
+.rv-box:focus{border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.12)}
+.rv-examples{font-size:9.5px;color:#858ca0;line-height:1.65;margin-top:9px;padding:9px 10px;background:rgba(139,92,246,.06);border-left:2px solid #8b5cf6;border-radius:6px}
+.rv-examples b{color:#c9ccda}
+.rv-chip{display:inline-block;margin:2px 3px 0 0;padding:2px 7px;background:#1c1f2b;border:1px solid #303447;border-radius:999px;font-size:9px;color:#a9afc4}
 </style>
 </head>
 <body>
@@ -297,7 +309,7 @@ body.mode-display-active .f-hint:hover{opacity:1}
   <aside class="editor">
     <div class="brand">
       <h1>Chat<span>Widget</span> Studio</h1>
-      <div class="badge">V3</div>
+      <div class="badge">V3 · AI</div>
     </div>
 
     <!-- MODE SWITCHER -->
@@ -309,31 +321,57 @@ body.mode-display-active .f-hint:hover{opacity:1}
     <!-- ===== UI MODE ===== -->
     <div class="mode-ui">
 
-      <!-- ===== PHOTO COLOR ANALYZER ===== -->
+      <!-- ===== AI STYLE ASSISTANT (Photo + RVchat) ===== -->
       <div class="section">
-        <h2>🎨 Photo Color Analyzer</h2>
-        <label class="upload-zone" id="uploadZone">
-          <input type="file" id="photoInput" accept="image/*">
-          <div class="upload-icon">📷</div>
-          <div class="upload-text">Upload Foto Karakter / Gambar</div>
-          <div class="upload-sub">DRAG & DROP ATAU KLIK</div>
-        </label>
-        <div class="photo-preview" id="photoPreview">
-          <img id="previewImg" alt="preview">
-          <div class="palette" id="palette"></div>
-          <div class="palette-modes">
-            <button class="palette-mode active" data-palette="vibrant">VIBRANT</button>
-            <button class="palette-mode" data-palette="pastel">PASTEL</button>
-            <button class="palette-mode" data-palette="dark">DARK</button>
+        <h2>🧠 AI Style Assistant</h2>
+        <div class="ai-tabs">
+          <button class="ai-tab active" data-ai="photo">📷 DARI FOTO</button>
+          <button class="ai-tab" data-ai="rv">💬 RVCHAT</button>
+        </div>
+
+        <!-- Panel: Dari Foto -->
+        <div class="ai-panel active" id="aiPhoto">
+          <label class="upload-zone" id="uploadZone">
+            <input type="file" id="photoInput" accept="image/*">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Upload Foto Karakter / Gambar</div>
+            <div class="upload-sub">DRAG & DROP ATAU KLIK</div>
+          </label>
+          <div class="photo-preview" id="photoPreview">
+            <img id="previewImg" alt="preview">
+            <div class="palette" id="palette"></div>
+            <div class="palette-modes">
+              <button class="palette-mode active" data-palette="vibrant">VIBRANT</button>
+              <button class="palette-mode" data-palette="pastel">PASTEL</button>
+              <button class="palette-mode" data-palette="dark">DARK</button>
+            </div>
+            <div class="analyze-status" id="analyzeStatus"></div>
+            <div class="buttons" style="margin-top:9px">
+              <button id="applyPalette">Apply Warna</button>
+              <button class="secondary" id="randomizePalette">Shuffle</button>
+            </div>
           </div>
-          <div class="analyze-status" id="analyzeStatus"></div>
+        </div>
+
+        <!-- Panel: RVchat -->
+        <div class="ai-panel" id="aiRV">
+          <textarea class="rv-box" id="rvInput" placeholder="Contoh: bikin chatbox kotak, warna ungu ke pink, teks putih, transparan 80%"></textarea>
           <div class="buttons" style="margin-top:9px">
-            <button id="applyPalette">Apply Warna</button>
-            <button class="secondary" id="randomizePalette">Shuffle</button>
+            <button id="rvApply">Terapkan RVchat</button>
+            <button class="secondary" id="rvClear">Bersihkan</button>
+          </div>
+          <div class="analyze-status" id="rvStatus"></div>
+          <div class="rv-examples">
+            <b>RVchat</b> — bahasa Indonesia/Inggris bebas, otomatis diterjemahkan ke CSS. Kata kunci yang dikenali:
+            <div style="margin-top:6px">
+              <span class="rv-chip">kotak</span><span class="rv-chip">bulat / pill</span><span class="rv-chip">chat bubble</span><span class="rv-chip">tiket</span><span class="rv-chip">outline</span>
+              <span class="rv-chip">ungu ke pink</span><span class="rv-chip">teks putih</span><span class="rv-chip">bubble hitam</span>
+              <span class="rv-chip">transparan 70%</span><span class="rv-chip">besar / kecil</span><span class="rv-chip">border tebal/tipis</span>
+            </div>
           </div>
         </div>
       </div>
-      <!-- ===== END PHOTO ANALYZER ===== -->
+      <!-- ===== END AI STYLE ASSISTANT ===== -->
 
       <div class="section">
         <h2>Test Message</h2>
@@ -439,7 +477,7 @@ body.mode-display-active .f-hint:hover{opacity:1}
     <header class="toolbar">
       <div>
         <div class="toolbar-title">Live Chat Preview</div>
-        <div class="toolbar-sub">Clean overlay • TikTok / YouTube • OBS / LIVE Studio</div>
+        <div class="toolbar-sub">Clean overlay • TikTok / YouTube • OBS / LIVE Studio • AI + RVchat style</div>
       </div>
       <button class="secondary" id="copy">Copy CSS</button>
     </header>
@@ -483,6 +521,115 @@ document.addEventListener('keydown', e=>{
   if(e.key==='f'||e.key==='F'){ e.preventDefault(); toggleDisplay(); }
 });
 $('displayBtn').onclick=toggleDisplay;
+
+/* ===== AI TAB SWITCH (Dari Foto / RVchat) ===== */
+document.querySelectorAll('.ai-tab').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.ai-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.ai-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    $(btn.dataset.ai==='photo'?'aiPhoto':'aiRV').classList.add('active');
+  };
+});
+
+/* ============================================================
+   RVCHAT — natural language (ID/EN) -> CSS style translator
+   ============================================================ */
+const RV_COLORS = {
+  ungu:'#8b5cf6',purple:'#8b5cf6',violet:'#8b5cf6',
+  pink:'#ec4899',merahmuda:'#ec4899',magenta:'#d946ef',
+  merah:'#ef4444',red:'#ef4444',
+  biru:'#3b82f6',blue:'#3b82f6',navy:'#1e3a8a',
+  hijau:'#22c55e',green:'#22c55e',lime:'#84cc16',tosca:'#06b6d4',cyan:'#06b6d4',teal:'#14b8a6',
+  kuning:'#eab308',yellow:'#eab308',emas:'#f59e0b',gold:'#f59e0b',
+  oranye:'#f97316',orange:'#f97316',
+  putih:'#ffffff',white:'#ffffff',
+  hitam:'#0f1117',black:'#0f1117',
+  abu:'#6b7280',abuabu:'#6b7280',gray:'#6b7280',grey:'#6b7280',
+  coklat:'#92400e',brown:'#92400e'
+};
+const RV_SHAPES = [
+  [/\bpersegi\b|\bsquare\b|\bbox\b|\bkotak\b(?!\s*pesan)/, 'shape-square'],
+  [/\bbulat\b|\bpill\b|\boval\b|\blonjong\b/, 'shape-pill'],
+  [/\bchat\b|\bgelembung\b/, 'shape-chat'],
+  [/\btiket\b|\bticket\b/, 'shape-ticket'],
+  [/\btajam\b|\bangular\b|\bpotongan\b/, 'shape-angled'],
+  [/\bnotch\b/, 'shape-notch'],
+  [/\boutline\b|\bgaris\b/, 'shape-outline'],
+  [/\blembut\b|\bsoft\b/, 'shape-soft']
+];
+function rvFindColor(word){ return RV_COLORS[word.toLowerCase().replace(/[^a-z]/g,'')] || null; }
+function rvSetShape(applied, text){
+  for(const [re, cls] of RV_SHAPES){
+    if(re.test(text)){ $('shape').value = cls; $('shape').oninput(); applied.push('shape='+(cls||'clean')); return; }
+  }
+}
+function rvParse(raw){
+  const text = ' '+raw.toLowerCase()+' ';
+  const applied = [];
+
+  rvSetShape(applied, text);
+
+  // gradient "X ke Y" / "X to Y"
+  let m = text.match(/\b(\w+)\s+(?:ke|to)\s+(\w+)\b/);
+  if(m){
+    const c1 = rvFindColor(m[1]), c2 = rvFindColor(m[2]);
+    if(c1){ $('accent1').value = c1; applied.push('accent1='+c1); }
+    if(c2){ $('accent2').value = c2; applied.push('accent2='+c2); }
+  }
+
+  // teks/text color
+  m = text.match(/\b(?:teks|text|tulisan|font)\s+(\w+)\b/);
+  if(m){ const c = rvFindColor(m[1]); if(c){ $('bubbleText').value = c; applied.push('text='+c); } }
+
+  // bubble/background color
+  m = text.match(/\b(?:bubble|kotak pesan|background|bg)\s+(\w+)\b/);
+  if(m){ const c = rvFindColor(m[1]); if(c){ $('bubble').value = c; applied.push('bubble='+c); } }
+
+  // aksen tunggal jika belum ada gradient match
+  if(!applied.some(a=>a.startsWith('accent1'))){
+    m = text.match(/\b(?:warna utama|aksen ?1|accent ?1)\s+(\w+)\b/);
+    if(m){ const c = rvFindColor(m[1]); if(c){ $('accent1').value = c; applied.push('accent1='+c); } }
+  }
+  if(!applied.some(a=>a.startsWith('accent2'))){
+    m = text.match(/\b(?:warna kedua|aksen ?2|accent ?2)\s+(\w+)\b/);
+    if(m){ const c = rvFindColor(m[1]); if(c){ $('accent2').value = c; applied.push('accent2='+c); } }
+  }
+
+  // opacity: angka + %
+  m = text.match(/(\d{1,3})\s?%/);
+  if(m){ $('opacity').value = Math.min(100, Math.max(20, +m[1])); applied.push('opacity='+$('opacity').value+'%'); }
+  else if(/\btransparan\b|\btransparent\b/.test(text)){ $('opacity').value = 70; applied.push('opacity=70%'); }
+
+  // font size besar/kecil
+  if(/\bbesar\b|\bgede\b|\blarge\b|\bbig\b/.test(text)){ $('font').value = 19; $('px').value = 22; $('py').value = 14; applied.push('size=besar'); }
+  else if(/\bkecil\b|\bsmall\b/.test(text)){ $('font').value = 12; $('px').value = 10; $('py').value = 6; applied.push('size=kecil'); }
+
+  // border tebal/tipis
+  if(/\bborder tebal\b|\bthick border\b/.test(text)){ $('border').value = 4; applied.push('border=tebal'); }
+  else if(/\bborder tipis\b|\bthin border\b|\btanpa border\b|\bno border\b/.test(text)){ $('border').value = 0; applied.push('border=tipis'); }
+
+  // radius eksplisit
+  m = text.match(/radius\s*(\d{1,3})/);
+  if(m){ $('radius').value = Math.min(45, +m[1]); applied.push('radius='+$('radius').value+'px'); }
+
+  vars();
+  return applied;
+}
+$('rvApply').onclick = ()=>{
+  const raw = $('rvInput').value.trim();
+  const rvStatus = $('rvStatus');
+  if(!raw){ rvStatus.textContent = 'Tulis instruksi dulu ya, contoh di bawah.'; rvStatus.className='analyze-status error'; return; }
+  const applied = rvParse(raw);
+  if(applied.length){
+    rvStatus.textContent = '✓ Diterapkan: ' + applied.join(', ');
+    rvStatus.className = 'analyze-status success';
+  } else {
+    rvStatus.textContent = 'Tidak ada kata kunci yang dikenali. Coba: "kotak, ungu ke pink, teks putih, transparan 70%"';
+    rvStatus.className = 'analyze-status error';
+  }
+};
+$('rvClear').onclick = ()=>{ $('rvInput').value=''; $('rvStatus').textContent=''; };
 
 /* ============================================================
    PHOTO COLOR ANALYZER
